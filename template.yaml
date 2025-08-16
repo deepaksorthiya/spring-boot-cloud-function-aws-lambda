@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  spring-boot-cloud-function-aws-lambda
+
+  This API allows you to store transactions of your favorite unicorn stocks
+
+Globals:
+  Function:
+    Runtime: java21
+    Architectures:
+      - x86_64
+    MemorySize: 2048
+    Timeout: 30
+
+Resources:
+  UnicornStockBrokerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: target/spring-boot-cloud-function-aws-lambda-0.0.1-SNAPSHOT-aws.jar
+      FunctionName: unicorn-stock-broker
+      Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest
+      Environment:
+        Variables:
+          #SPRING_CLOUD_FUNCTION_DEFINITION: unicornStockBrokerHandler
+          MAIN_CLASS: com.example.Application
+      Events:
+        UnicornStockBrokerEvent:
+          Type: Api
+          Properties:
+            Path: /transactions
+            Method: post
+Outputs:
+  UnicornStockBrokerApi:
+    Description: "API Gateway endpoint URL for Prod stage for Unicorn StockBroker function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.localhost.localstack.cloud/Prod"
+  UnicornStockBrokerFunction:
+    Description: "Unicorn StockBroker Lambda Function ARN"
+    Value: !GetAtt UnicornStockBrokerFunction.Arn
+
