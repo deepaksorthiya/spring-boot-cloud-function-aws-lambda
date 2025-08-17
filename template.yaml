@@ -17,11 +17,13 @@ Resources:
   UnicornStockBrokerFunction:
     Type: AWS::Serverless::Function
     Properties:
+      ## this code-uri path not works on windows cmd/powershell use wsl
       CodeUri: target/spring-boot-cloud-function-aws-lambda-0.0.1-SNAPSHOT-aws.jar
       FunctionName: unicorn-stock-broker
       Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest
       Environment:
         Variables:
+          # uncomment if you have multiple functions and want to use specific by it bean name
           #SPRING_CLOUD_FUNCTION_DEFINITION: unicornStockBrokerHandler
           MAIN_CLASS: com.example.Application
       Events:
