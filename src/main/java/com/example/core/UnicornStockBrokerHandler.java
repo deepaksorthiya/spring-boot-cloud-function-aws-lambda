@@ -1,5 +1,6 @@
 package com.example.core;
 
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.example.model.Transaction;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.function.Function;
 
 @Component
-public class UnicornStockBrokerHandler implements Function<Transaction, APIGatewayProxyResponseEvent> {
+public class UnicornStockBrokerHandler implements Function<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private final TransactionService transactionService;
     private static final Logger LOGGER = LoggerFactory.getLogger(UnicornStockBrokerHandler.class);
@@ -22,12 +23,18 @@ public class UnicornStockBrokerHandler implements Function<Transaction, APIGatew
         this.objectMapper = objectMapper;
     }
 
-    public APIGatewayProxyResponseEvent apply(final Transaction transaction) {
+    public APIGatewayProxyResponseEvent apply(final APIGatewayProxyRequestEvent requestEvent) {
+        LOGGER.info("Gateway Request : {}", requestEvent);
+        final Transaction transaction;
+        try {
+            transaction = objectMapper.readValue(requestEvent.getBody(), Transaction.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         LOGGER.info("Transaction Processing: {}", transaction);
         if (!transaction.isValid()) {
             return createAPIGwResponse(400, "Invalid request body.");
         }
-
         var transactionResponse = transactionService.writeTransaction(transaction);
         return transactionResponse
                 .map(it -> createAPIGwResponse(200, generateJSONResponse(it)))
