@@ -38,7 +38,7 @@ samlocal build
 From the project root folder - where the `template.yml` file is located - start the API with the SAM CLI.
 
 ```bash
-$ sam local start-api
+$ sam local start-api --warm-containers EAGER
 
 ...
 Mounting Mounting AwsLambdaSpringFunction at  (java21) at http://127.0.0.1:3000/transactions/ [POST]
@@ -71,7 +71,7 @@ curl --location 'http://127.0.0.1:3000/transactions/' \
 sam local invoke -d 5005 <function logical id>
 OR
 # Start local API Gateway in debug mode on port 5005
-sam local start-api -d 5005
+sam local start-api -d 5005 --warm-containers EAGER
 ```
 
 Fire first request ``http://127.0.0.1:3000/`` to up docker container.
